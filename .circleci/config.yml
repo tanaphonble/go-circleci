@@ -23,9 +23,6 @@ jobs:
             echo 'export ECR_REPOSITORY_NAME="${AWS_RESOURCE_NAME_PREFIX}"' >> $BASH_ENV
             echo 'export ECR_IMAGE_NAME="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}:${CIRCLE_SHA1}"' >> $BASH_ENV
             echo 'export CIRCLE_IMAGE_NAME="${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}"' >> $BASH_ENV
-            echo 'export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}' >> $BASH_ENV
-            echo 'export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}' >> $BASH_ENV
-
       - run:
           name: Build Image
           command: docker build -t ${CIRCLE_IMAGE_NAME} .
@@ -52,6 +49,14 @@ jobs:
       - setup_remote_docker
       - attach_workspace:
           at: workspace
+      - run:
+          name: Set convinience environment variables
+          command: |
+            echo 'export ECR_REPOSITORY_NAME="${AWS_RESOURCE_NAME_PREFIX}"' >> $BASH_ENV
+            echo 'export ECR_IMAGE_NAME="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}:${CIRCLE_SHA1}"' >> $BASH_ENV
+            echo 'export CIRCLE_IMAGE_NAME="${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}"' >> $BASH_ENV
+            echo 'export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}' >> $BASH_ENV
+            echo 'export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}' >> $BASH_ENV
       - run:
           name: Install awscli
           command: |
