@@ -13,7 +13,9 @@ jobs:
       - setup_remote_docker
       - run:
           name: Install awscli
-          command: sudo apt-get install -y awscli
+          command: |
+            sudo apt-get install python3-pip
+            pip install -r requirements.txt
       - run:
           name: Create executable
           command: CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o build/app-docker main.go
@@ -36,7 +38,7 @@ jobs:
       - run:
           name: Push image
           command: |
-            eval $(aws ecr get-login --region $AWS_DEFAULT_REGION)
+            eval $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
             docker tag ${CIRCLE_IMAGE_NAME} ${ECR_IMAGE_NAME}
             docker push ${ECR_IMAGE_NAME}
 
