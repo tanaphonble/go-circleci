@@ -36,7 +36,7 @@ jobs:
             echo "current dir (save) `pwd`"
             docker save -o docker-image/image.tar $CIRCLE_IMAGE_NAME
       - persist_to_workspace:
-          root: workspace
+          root: .
           paths:
             - docker-image
 
@@ -49,7 +49,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - attach_workspace:
-          at: /tmp/workspace
+          at: workspace
       - run:
           name: Install awscli
           command: |
