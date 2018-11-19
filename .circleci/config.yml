@@ -1,6 +1,8 @@
 version: 2
 jobs:
   build-go1.11-gomodules:
+    branches:
+     only: ci
     docker:
       - image: circleci/golang:1.11
     working_directory: ~/app
