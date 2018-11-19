@@ -34,7 +34,7 @@ jobs:
           command: |
             mkdir docker-image
             echo "current dir (save) `pwd`"
-            docker save -o workspace/docker-image/image.tar $CIRCLE_IMAGE_NAME
+            docker save -o docker-image/image.tar $CIRCLE_IMAGE_NAME
       - persist_to_workspace:
           root: workspace
           paths:
