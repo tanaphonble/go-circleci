@@ -32,9 +32,11 @@ jobs:
       - run:
           name: Save image to an archive
           command: |
-            mkdir docker-image
+            mkdir -p docker-image
             echo "current dir (save) `pwd`"
             docker save -o docker-image/image.tar $CIRCLE_IMAGE_NAME
+            echo "FILES LIST"
+            ls
       - persist_to_workspace:
           root: .
           paths:
@@ -60,7 +62,9 @@ jobs:
           name: Load image
           command: |
             echo "current dir `pwd`"
-            docker load --input docker-image/image.tar
+            echo "FILES LIST"
+            ls
+            docker load --input workspace/docker-image/image.tar
       - run:
           name: Push image
           command: |
