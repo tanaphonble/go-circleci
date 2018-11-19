@@ -57,6 +57,7 @@ jobs:
       - run:
           name: Load image
           command: |
+            echo "current dir `pwd`"
             docker load --input docker-image/image.tar
       - run:
           name: Push image
