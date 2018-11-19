@@ -36,7 +36,7 @@ jobs:
       - run:
           name: Push image
           command: |
-            eval $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+            eval $(aws ecr get-login --region $AWS_DEFAULT_REGION)
             docker tag ${CIRCLE_IMAGE_NAME} ${ECR_IMAGE_NAME}
             docker push ${ECR_IMAGE_NAME}
 
