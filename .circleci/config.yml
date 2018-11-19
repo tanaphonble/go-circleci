@@ -6,7 +6,6 @@ jobs:
         only: ci
     docker:
       - image: circleci/golang:1.11
-    working_directory: ~/app
     steps:
       - checkout
       - setup_remote_docker
@@ -35,9 +34,9 @@ jobs:
           command: |
             mkdir docker-image
             echo "current dir (save) `pwd`"
-            docker save -o docker-image/image.tar $CIRCLE_IMAGE_NAME
+            docker save -o workspace/docker-image/image.tar $CIRCLE_IMAGE_NAME
       - persist_to_workspace:
-          root: .
+          root: workspace
           paths:
             - docker-image
 
@@ -49,6 +48,8 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Install awscli
           command: |
@@ -59,7 +60,7 @@ jobs:
           name: Load image
           command: |
             echo "current dir `pwd`"
-            docker load --input /home/circleci/app/docker-image/image.tar
+            docker load --input docker-image/image.tar
       - run:
           name: Push image
           command: |
