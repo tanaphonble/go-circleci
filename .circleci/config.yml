@@ -50,7 +50,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - attach_workspace:
-          at: workspace
+          at: app
       - run:
           name: Install awscli
           command: |
