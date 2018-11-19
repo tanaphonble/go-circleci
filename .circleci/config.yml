@@ -71,3 +71,4 @@ workflows:
   build_and_test:
     jobs:
       - build-go1.11-gomodules
+      - push-image
