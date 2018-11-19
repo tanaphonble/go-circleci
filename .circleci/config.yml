@@ -23,7 +23,7 @@ jobs:
 
       - run:
           name: Build Image
-          command: docker build -t ${$CIRCLE_IMAGE_NAME} .
+          command: docker build -t ${CIRCLE_IMAGE_NAME} .
       - run:
           name: Test Image
           command: |
@@ -32,7 +32,7 @@ jobs:
           name: Push image
           command: |
             eval "$(aws ecr get-login --no-include-email --region ap-southeast-1)"
-            docker tag ${$CIRCLE_IMAGE_NAME} ${ECR_IMAGE_NAME}
+            docker tag ${CIRCLE_IMAGE_NAME} ${ECR_IMAGE_NAME}
             docker push ${ECR_IMAGE_NAME}
 
 workflows:
