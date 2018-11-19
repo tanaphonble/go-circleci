@@ -12,6 +12,9 @@ jobs:
       - run: go test -race
       - setup_remote_docker
       - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      - run:
           name: Create executable
           command: CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o build/app-docker main.go
       - run:
