@@ -6,13 +6,75 @@ jobs:
         only: ci
     docker:
       - image: circleci/golang:1.11
-    working_directory: ~/app
     steps:
       - checkout
-      - run: go test -race
+      - setup_remote_docker
+      - run:
+          name: Create executable
+          command: CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o build/app-docker main.go
+      - run:
+          name: Set convinience environment variables
+          command: |
+            echo 'export CIRCLE_IMAGE_NAME="${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}"' >> $BASH_ENV
+      - run:
+          name: Build Image
+          command: docker build -t ${CIRCLE_IMAGE_NAME} .
+      - run:
+          name: Save image to an archive
+          command: |
+            mkdir -p docker-image
+            echo "current dir (save) `pwd`"
+            docker save -o docker-image/image.tar $CIRCLE_IMAGE_NAME
+            echo "FILES LIST"
+            ls
+      - persist_to_workspace:
+          root: .
+          paths:
+            - docker-image
 
+  push-image:
+    docker:
+      - image: circleci/python:3.6.1
+    environment:
+      AWS_DEFAULT_OUTPUT: json
+    steps:
+      - checkout
+      - setup_remote_docker
+      - attach_workspace:
+          at: workspace
+      - run:
+          name: Set convinience environment variables
+          command: |
+            echo 'export ECR_REPOSITORY_NAME="${AWS_RESOURCE_NAME_PREFIX}"' >> $BASH_ENV
+            echo 'export ECR_IMAGE_NAME="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}:${CIRCLE_SHA1}"' >> $BASH_ENV
+            echo 'export CIRCLE_IMAGE_NAME="${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}"' >> $BASH_ENV
+            echo 'export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}' >> $BASH_ENV
+            echo 'export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}' >> $BASH_ENV
+      - run:
+          name: Install awscli
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+      - run:
+          name: Load image
+          command: |
+            echo "current dir `pwd`"
+            echo "FILES LIST"
+            ls
+            docker load --input workspace/docker-image/image.tar
+      - run:
+          name: Push image
+          command: |
+            . venv/bin/activate
+            eval $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+            docker tag $CIRCLE_IMAGE_NAME $ECR_IMAGE_NAME
+            docker push $ECR_IMAGE_NAME
 workflows:
   version: 2
-  build_and_test:
+  build-test-and-push:
     jobs:
       - build-go1.11-gomodules
+      - push-image:
+          requires:
+            - build-go1.11-gomodules
